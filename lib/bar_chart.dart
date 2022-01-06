@@ -1,4 +1,4 @@
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:charts_flutter/flutter.dart' as bar;
 import 'package:flutter/material.dart';
 
 class BarChart extends StatelessWidget {
@@ -7,8 +7,8 @@ class BarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<charts.Series<TimeOpen, String>> series = [
-      charts.Series(
+    List<bar.Series<TimeOpen, String>> series = [
+      bar.Series(
         id: "notif",
         data: data,
         domainFn: (TimeOpen series, _) => series.notif!,
@@ -32,7 +32,7 @@ class BarChart extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: charts.BarChart(
+                child: bar.BarChart(
                   series,
                   animate: true,
                 ),
@@ -48,7 +48,7 @@ class BarChart extends StatelessWidget {
 class TimeOpen {
   final String? notif;
   final int range;
-  final charts.Color color;
+  final bar.Color color;
 
   TimeOpen(this.notif, this.range, this.color);
 }

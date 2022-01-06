@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:alarm_app/constant/theme_data.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +22,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String hour = '0';
   String minute = '0';
+  String status = '';
   bool isActived = false;
   bool isAm = true;
   List<bool> isSelected = List.generate(2, (index) => false);
@@ -50,7 +52,7 @@ class _HomeState extends State<Home> {
                 payload,
                 DateTime.now().difference(DateTime.parse(payload!)).inSeconds,
                 charts.ColorUtil.fromDartColor(
-                  Colors.amber,
+                  CustomColors.primaryColor,
                 ),
               )
             ],
@@ -66,7 +68,7 @@ class _HomeState extends State<Home> {
     );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Alarm active for $formattedDate'),
+        content: Text('Alarm set for $formattedDate'),
       ),
     );
   }
@@ -90,143 +92,162 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Alarm App',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+      backgroundColor: CustomColors.menuBackgroundColor,
+      body: Stack(
+        children: [
+          Align(alignment: Alignment.center, child: Clock()),
+          SizedBox(
+            height: 32,
           ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-        actions: [
           Align(
-            alignment: Alignment.center,
-            child: Text(
-              isActived ? 'Active' : 'Off',
-              style: TextStyle(
-                color: isActived ? Colors.amber : Colors.red,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 96.0, left: 16, right: 16),
+              child: activateButton(),
             ),
           ),
-          Switch(
-              value: isActived,
-              activeColor: Colors.amber,
-              onChanged: (value) {
-                setState(() {
-                  isActived = value;
-                  if (isActived) {
-                    NotificationApi.showNotificationSchedule(
-                        title: 'Alarm',
-                        body: 'Your alarm is active',
-                        payload: setDateTime().toString(),
-                        scheduleDate: setDateTime());
-                    Future.delayed(
-                        Duration(
-                            seconds: setDateTime()
-                                .difference(DateTime.now())
-                                .inSeconds), () {
-                      isActived = false;
+        ],
+      ),
+    );
+  }
+
+  Widget activateButton() {
+    return Container(
+      child: Row(
+        children: [clockText(), Spacer(), switchNya()],
+      ),
+    );
+  }
+
+  Widget clockText() {
+    return Opacity(
+      opacity: isActived ? 1 : 0.5,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 1),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            BlocBuilder<HourBloc, HourState>(
+              builder: (context, state) {
+                Future.delayed(Duration.zero, () {
+                  if (state is LoadedHour) {
+                    setState(() {
+                      hour = state.hour;
                     });
-                    showSnackBar();
-                  } else {
-                    NotificationApi.cancel();
                   }
                 });
-              })
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 80),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                BlocBuilder<HourBloc, HourState>(
-                  builder: (context, state) {
-                    Future.delayed(Duration.zero, () {
-                      if (state is LoadedHour) {
-                        setState(() {
-                          hour = state.hour;
-                        });
-                      }
-                    });
-                    return Text(state is LoadedHour ? state.hour : '00',
-                        style: TextStyle(
-                            fontSize: 54, fontWeight: FontWeight.bold));
-                  },
-                ),
-                SizedBox(
-                  width: 5,
-                ),
-                Text(':',
-                    style:
-                        TextStyle(fontSize: 54, fontWeight: FontWeight.bold)),
-                SizedBox(
-                  width: 5,
-                ),
-                BlocBuilder<MinuteBloc, MinuteState>(
-                  builder: (context, state) {
-                    Future.delayed(Duration.zero, () {
-                      if (state is LoadedMinute) {
-                        setState(() {
-                          minute = state.minute;
-                        });
-                      }
-                    });
-                    return Text(state is LoadedMinute ? state.minute : '00',
-                        style: TextStyle(
-                            fontSize: 54, fontWeight: FontWeight.bold));
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: ToggleButtons(
-                    selectedColor: Colors.amber,
-                    children: const [
-                      Text(
-                        'AM',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'PM',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    ],
-                    onPressed: (int index) {
-                      setState(() {
-                        for (int buttonIndex = 0;
-                            buttonIndex < isSelected.length;
-                            buttonIndex++) {
-                          if (buttonIndex == index) {
-                            isAm = index == 0 ? true : false;
-                            isActived = false;
-                            isSelected[buttonIndex] = true;
-                            NotificationApi.cancel();
-                          } else {
-                            isSelected[buttonIndex] = false;
-                          }
-                        }
-                      });
-                    },
-                    isSelected: isSelected,
-                  ),
-                ),
-              ],
+                return Text(state is LoadedHour ? state.hour : '00',
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: CustomColors.primaryTextColor));
+              },
             ),
-          ),
-          Clock(),
-        ],
+            SizedBox(
+              width: 5,
+            ),
+            Text(':',
+                style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: CustomColors.primaryTextColor)),
+            SizedBox(
+              width: 5,
+            ),
+            BlocBuilder<MinuteBloc, MinuteState>(
+              builder: (context, state) {
+                Future.delayed(Duration.zero, () {
+                  if (state is LoadedMinute) {
+                    setState(() {
+                      minute = state.minute;
+                    });
+                  }
+                });
+                return Text(state is LoadedMinute ? state.minute : '00',
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: CustomColors.primaryTextColor));
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: Container(
+                // color: CustomColors.dividerColor,
+                child: ToggleButtons(
+                  selectedColor: CustomColors.primaryColor,
+                  color: CustomColors.primaryTextColor,
+                  fillColor: CustomColors.dividerColor,
+                  disabledColor: CustomColors.dividerColor,
+                  borderColor: CustomColors.dividerColor,
+                  children: const [
+                    Text(
+                      'AM',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'PM',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ],
+                  onPressed: (int index) {
+                    setState(() {
+                      for (int buttonIndex = 0;
+                          buttonIndex < isSelected.length;
+                          buttonIndex++) {
+                        if (buttonIndex == index) {
+                          isAm = index == 0 ? true : false;
+                          isActived = false;
+                          isSelected[buttonIndex] = true;
+                          NotificationApi.cancel();
+                        } else {
+                          isSelected[buttonIndex] = false;
+                        }
+                      }
+                    });
+                  },
+                  isSelected: isSelected,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget switchNya() {
+    return Opacity(
+      opacity: isActived ? 1 : 0.5,
+      child: Switch(
+          value: isActived,
+          activeColor: CustomColors.primaryColor,
+          onChanged: (value) {
+            setState(() {
+              isActived = value;
+              if (isActived) {
+                NotificationApi.showNotificationSchedule(
+                    title: 'Alarm',
+                    body: 'Your alarm is active',
+                    payload: setDateTime().toString(),
+                    scheduleDate: setDateTime());
+                Future.delayed(
+                    Duration(
+                        seconds: setDateTime()
+                            .difference(DateTime.now())
+                            .inSeconds), () {
+                  isActived = false;
+                });
+                showSnackBar();
+              } else {
+                NotificationApi.cancel();
+              }
+            });
+          }),
     );
   }
 }

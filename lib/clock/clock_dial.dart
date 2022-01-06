@@ -26,9 +26,9 @@ class ClockDialPainter extends CustomPainter{
           textDirection: TextDirection.rtl,
         ),
         textStyle= const TextStyle(
-          color: Colors.black,
+          color: Colors.white,
           fontFamily: 'Times New Roman',
-          fontSize: 15.0,
+          fontSize: 18.0,
         )
   {
     tickPaint.color= Colors.amber;

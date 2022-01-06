@@ -1,5 +1,6 @@
 import 'package:alarm_app/clock/clock_dial.dart';
 import 'package:alarm_app/clock/clock_text.dart';
+import 'package:alarm_app/constant/theme_data.dart';
 import 'package:flutter/material.dart';
 
 import 'hour_hand.dart';
@@ -20,12 +21,6 @@ class _ClockState extends State<Clock> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    WheelCircle wheelCircle = WheelCircle(
-        wheelSize: wheelSize,
-        longNeedleHeight: longNeedleHeight,
-        shortNeedleHeight: shortNeedleHeight,
-        context: context);
 
     return Column(
       children: [
@@ -55,7 +50,7 @@ class _ClockState extends State<Clock> with TickerProviderStateMixin {
                   width: 15,
                   height: 15,
                   decoration: BoxDecoration(
-                      color: Colors.amber,
+                      color: CustomColors.primaryColor,
                       borderRadius: BorderRadius.circular(10)),
                 ),
               ),
